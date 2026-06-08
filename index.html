@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para ti...</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap');
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden; display: flex; justify-content: center;
+            align-items: center; color: #fff;
+        }
+
+        /* --- Panel Secreto de Calibración --- */
+        #calibrador {
+            display: none; position: fixed; top: 10px; left: 10px;
+            background: rgba(0,0,0,0.85); color: #0f0; padding: 20px;
+            z-index: 9999; border-radius: 10px; width: 90%; max-width: 600px;
+        }
+        #calibrador button {
+            background: #0f0; color: #000; font-weight: bold;
+            padding: 10px; width: 100%; cursor: pointer; border: none; margin-bottom: 10px;
+        }
+        #calibrador textarea {
+            width: 100%; height: 150px; font-family: monospace; font-size: 12px;
+        }
+
+        #start-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 154, 158, 0.95); display: flex;
+            flex-direction: column; justify-content: center; align-items: center;
+            z-index: 100; cursor: pointer; transition: opacity 1s ease;
+        }
+        #start-screen h1 {
+            font-family: 'Dancing Script', cursive; font-size: 3rem;
+            text-align: center; animation: pulse 1.5s infinite alternate;
+        }
+
+        #main-container {
+            display: none; flex-direction: column; align-items: center;
+            text-align: center; z-index: 10; width: 90%; max-width: 600px;
+        }
+
+        .question {
+            font-family: 'Dancing Script', cursive; font-size: 4rem;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.2); margin-bottom: 30px; color: #d81b60;
+        }
+
+        .buttons-container { position: relative; width: 100%; height: 100px; display: flex; justify-content: center; gap: 40px; margin-bottom: 40px; }
+        
+        .btn {
+            font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 600;
+            padding: 15px 40px; border: none; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s;
+        }
+        
+        #btn-yes { background-color: #d81b60; color: white; z-index: 20; }
+        #btn-yes:hover { transform: scale(1.1); background-color: #c2185b; }
+        
+        #btn-no { background-color: #fff; color: #d81b60; z-index: 9999; } /* z-index alto para que no se esconda */
+
+        #lyrics-container { height: 80px; width: 100%; display: flex; justify-content: center; align-items: center; margin-top: 20px; }
+        #lyrics-text {
+            font-size: 1.5rem; font-style: italic; text-shadow: 1px 1px 5px rgba(0,0,0,0.2);
+            opacity: 0; transition: opacity 0.3s ease; text-align: center; color: #fff; font-weight: 600;
+        }
+
+        #success-screen {
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 154, 158, 0.95); z-index: 50;
+            font-family: 'Dancing Script', cursive;
+        }
+        #success-screen h1 { font-size: 5rem; color: #d81b60; text-align: center; }
+
+        @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.05); } }
+
+        .heart {
+            position: absolute; bottom: -100px; background-color: rgba(255, 255, 255, 0.5);
+            width: 20px; height: 20px; transform: rotate(-45deg); animation: float 10s infinite ease-in; z-index: 1;
+        }
+        .heart::before, .heart::after {
+            content: ''; position: absolute; width: 20px; height: 20px;
+            background-color: rgba(255, 255, 255, 0.5); border-radius: 50%;
+        }
+        .heart::before { top: -10px; left: 0; }
+        .heart::after { left: 10px; top: 0; }
+        @keyframes float { 0% { transform: translateY(0) rotate(-45deg) scale(0.8); opacity: 1; } 100% { transform: translateY(-100vh) rotate(-45deg) scale(1.5); opacity: 0; } }
+    </style>
+</head>
+<body>
+
+    <div id="calibrador">
+        <p><strong>MODO CALIBRACIÓN ACTIVO</strong><br>Presiona ESPACIO o el botón justo cuando empiece la frase de la pantalla.</p>
+        <button id="btn-marcar">EMPEZAR A MARCAR TIEMPOS</button>
+        <textarea id="texto-resultado" placeholder="Aquí aparecerá tu código final..."></textarea>
+    </div>
+
+    <audio id="bgm" src="LOVERGIRL.mp3"></audio>
+
+    <div id="start-screen" onclick="iniciarSorpresa()">
+        <h1>Tengo una sorpresa para ti... 💖<br><span style="font-size: 1.5rem; font-family: 'Poppins', sans-serif;">(Haz clic para empezar)</span></h1>
+    </div>
+
+    <div id="main-container">
+        <h1 class="question">¿Quieres volver a ser mi pareja?</h1>
+        <div class="buttons-container">
+            <button id="btn-yes" class="btn" onclick="aceptar()">¡Sí, acepto!</button>
+            <button id="btn-no" class="btn">No</button>
+        </div>
+        <div id="lyrics-container"><div id="lyrics-text"></div></div>
+    </div>
+
+    <div id="success-screen">
+        <h1>¡Sabía que dirías que sí! ❤️<br>Te amo</h1>
+    </div>
+
+    <script>
+        // =========================================================
+        // 🔧 ZONA DE AJUSTES
+        // =========================================================
+
+        // 1. ¿Quieres usar la herramienta para sincronizarlo tú mismo a la perfección?
+        // Cambia la palabra false por true
+        const MODO_CALIBRACION = false; 
+
+        // 2. Si las letras salen muy temprano, pon números positivos (ej: 1.5). 
+        // Si salen muy tarde, pon números negativos (ej: -2.0)
+        const AJUSTE_GLOBAL = 0.0; 
+
+        const letrasData = [
+            { time: 5.0, text: "This skyscraper's causing vertigo" },
+            { time: 11.0, text: "The countdown begins in Tokyo" },
+            { time: 16.0, text: "27 days alone means 20 million ways to cope" },
+            { time: 21.0, text: "Without you" },
+            { time: 26.0, text: "I'm in a reckless fever" },
+            { time: 29.0, text: "Lovestruck boy, I'd tease him" },
+            { time: 32.2, text: "Thought I'd never be him" },
+            { time: 35.0, text: "Quite the job you've done on me, miss" },
+            { time: 37.7, text: "You've been hosting parties in my mind" },
+            { time: 41.4, text: "I'm working overtime to have you in my world" },
+            { time: 48.1, text: "Oh, what a curse it is to be a lover boy" },
+            { time: 57.0, text: "Forced to get creative, wrote my feelings down" },
+            { time: 61.5, text: "The independent guy in me is nowhere to be found" },
+            { time: 67.0, text: "I can't wait another day to see you" },
+            { time: 71.0, text: "How embarrassing to be this way" },
+            { time: 77.5, text: "I'm in a reckless fever" },
+            { time: 81.2, text: "Lovestruck boy, I'd tease him" },
+            { time: 83.0, text: "Thought I'd never be him" },
+            { time: 86.0, text: "Quite the job you've done on me, miss" },
+            { time: 89.0, text: "You've been hosting parties in my mind" },
+            { time: 93.1, text: "I'm working overtime to have you in my world" },
+            { time: 100.0, text: "Oh, what a curse it is to be in love" },
+            { time: 103.0, text: "I wait by the phone like a high school movie" },
+            { time: 109.0, text: "Dream at the shows you'll come running to me" },
+            { time: 114.4, text: "Think I see you in the wings" },
+            { time: 119.0, text: "God, I'm hallucinating" },
+            { time: 124.0, text: "What a reckless fever" },
+            { time: 127.5, text: "Lovestruck boy, I'd tease him" },
+            { time: 130.5, text: "Thought I'd never be him" },
+            { time: 133.2, text: "Quite the job you've done on me, miss" },
+            { time: 136.0, text: "You've been hosting parties in my mind" },
+            { time: 139.1, text: "I'm working overtime" },
+            { time: 142.0, text: "You've become my whole world" },
+            { time: 146.1, text: "Oh, what a curse it is to be a lover boy" }
+        ];
+
+        // =========================================================
+
+        for (let i = 0; i < 20; i++) {
+            let heart = document.createElement("div"); heart.classList.add("heart");
+            heart.style.left = Math.random() * 100 + "vw"; heart.style.animationDuration = Math.random() * 5 + 5 + "s"; heart.style.animationDelay = Math.random() * 5 + "s";
+            document.body.appendChild(heart);
+        }
+
+        // CORRECCIÓN DEL BOTÓN "NO"
+        const btnNo = document.getElementById("btn-no");
+        function moverBoton() {
+            // Usamos fixed para que flote relativo a toda la pantalla y nunca se esconda
+            btnNo.style.position = "fixed"; 
+            const maxX = window.innerWidth - btnNo.offsetWidth - 20;
+            const maxY = window.innerHeight - btnNo.offsetHeight - 20;
+            btnNo.style.left = `${Math.max(20, Math.random() * maxX)}px`;
+            btnNo.style.top = `${Math.max(20, Math.random() * maxY)}px`;
+        }
+        
+        btnNo.addEventListener("mouseover", moverBoton);
+        btnNo.addEventListener("touchstart", (e) => { e.preventDefault(); moverBoton(); });
+
+        function aceptar() {
+            document.getElementById("main-container").style.display = "none";
+            document.getElementById("success-screen").style.display = "flex";
+        }
+
+        const audio = document.getElementById("bgm");
+        const lyricsText = document.getElementById("lyrics-text");
+        let currentLine = 0;
+        let calibracionActiva = false;
+
+        let tiemposNuevos = [];
+        let indexCalif = 0;
+
+        if (MODO_CALIBRACION) {
+            document.getElementById("calibrador").style.display = "block";
+            const btnMarcar = document.getElementById("btn-marcar");
+            const txtResultado = document.getElementById("texto-resultado");
+
+            function registrarTiempo() {
+                if (indexCalif < letrasData.length) {
+                    const tiempoActual = audio.currentTime.toFixed(2);
+                    tiemposNuevos.push(`    { time: ${tiempoActual}, text: "${letrasData[indexCalif].text}" }`);
+                    
+                    lyricsText.style.opacity = 1;
+                    lyricsText.innerText = letrasData[indexCalif].text;
+                    indexCalif++;
+                    
+                    if (indexCalif < letrasData.length) {
+                        btnMarcar.innerText = "SIGUIENTE: " + letrasData[indexCalif].text;
+                    } else {
+                        btnMarcar.innerText = "¡LISTO! COPIA EL TEXTO";
+                        txtResultado.value = "const letrasData = [\n" + tiemposNuevos.join(",\n") + "\n];";
+                    }
+                }
+            }
+
+            btnMarcar.onclick = registrarTiempo;
+            window.addEventListener("keydown", (e) => {
+                if (e.code === "Space" && calibracionActiva) {
+                    e.preventDefault(); registrarTiempo();
+                }
+            });
+        }
+
+        function iniciarSorpresa() {
+            document.getElementById("start-screen").style.opacity = "0";
+            setTimeout(() => {
+                document.getElementById("start-screen").style.display = "none";
+                document.getElementById("main-container").style.display = "flex";
+                audio.play();
+                calibracionActiva = true;
+            }, 1000);
+        }
+
+        audio.addEventListener("timeupdate", () => {
+            if (!MODO_CALIBRACION && currentLine < letrasData.length) {
+                if (audio.currentTime >= (letrasData[currentLine].time + AJUSTE_GLOBAL)) {
+                    mostrarLetra(letrasData[currentLine].text);
+                    currentLine++;
+                }
+            }
+        });
+
+        function mostrarLetra(texto) {
+            lyricsText.style.opacity = 0;
+            setTimeout(() => {
+                lyricsText.innerText = texto;
+                lyricsText.style.opacity = 1;
+            }, 200); 
+        }
+    </script>
+</body>
+</html>
